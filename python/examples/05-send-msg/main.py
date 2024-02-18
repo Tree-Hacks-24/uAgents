@@ -50,8 +50,8 @@ def verify(img1, img2):
 async def send_message(ctx: Context):
     # Example usage of converting image files to base64 strings before sending
     # Here you should replace 'path/to/image1.jpg' and 'path/to/image2.jpg' with actual paths
-    img1_base64 = encode_image_base64('./img1.jpg')
-    img2_base64 = encode_image_base64('./img2.jpg')
+    img1_base64 = encode_image_base64('./img2.jpg')
+    img2_base64 = encode_image_base64('./img1.jpg')
     print("Hey Bob, I want you to check if these two faces are the same people.")
     await ctx.send(bob.address, VerifyMessage(img1_base64=img1_base64, img2_base64=img2_base64))
 
@@ -59,9 +59,14 @@ async def send_message(ctx: Context):
 async def message_handler(ctx: Context, sender: str, msg: VerifyMessage):
     ctx.logger.info(f"Attempting to verify images from {sender}")
     verify_result = verify(msg.img1_base64, msg.img2_base64)
-    # Here you can add more logic based on the verification result,
-    # e.g., sending a response back or logging the result.
-    ctx.logger.info(f"Verification result received: {verify_result}")
+    if verify_result is not None:
+        if verify_result['verified']:
+            response_message = f"\nHey Alice,\n The faces match according to the verification. \n\n\n {verify_result}"
+        else:
+            response_message = f"\nHey Alice,\n The faces do not match according to the verification. \n\n\n {verify_result}"
+        ctx.logger.info(response_message)
+    else:
+        ctx.logger.info("Verification could not be completed due to an error.")
 
 bureau = Bureau()
 bureau.add(alice)
